@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Loco Pilot Tamil Nadu</title><style>
+:root{--bg:#f4f1ea;--fg:#1c1b19;--c:#fff;--ac:#c2410c;--mu:#666;--bd:#d8d2c4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14120f;--fg:#eee;--c:#211e1a;--mu:#aaa;--bd:#3a352d}}
+:root[data-theme="dark"]{--bg:#14120f;--fg:#eee;--c:#211e1a;--mu:#aaa;--bd:#3a352d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,sans-serif;padding:10px}
+h1{font-size:18px;margin:0 0 6px}.card{background:var(--c);border:1px solid var(--bd);border-radius:10px;padding:10px;margin:8px 0}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:10px 12px;font-size:15px;margin:3px}button.g{background:var(--c);color:var(--fg);border:1px solid var(--bd)}button:disabled{opacity:.4}
+canvas{width:100%;border-radius:10px;display:block;background:#000}
+#sub{min-height:54px;border-left:4px solid var(--ac)}#sub b{color:var(--ac)}.ta{font-size:16px}.en{color:var(--mu);font-size:13px}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center;font-size:12px}.hud b{display:block;font-size:17px}
+label{display:block;margin:4px 0}.row{display:flex;flex-wrap:wrap;align-items:center}input[type=text]{flex:1;min-width:120px;padding:9px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)}
+.hide{display:none}svg{width:100%;max-height:200px}
+.cab{justify-content:space-around;align-items:center;background:#2a2622;color:#eee;border-color:#000}.lv{display:flex;flex-direction:column;align-items:center}
+input.vt{writing-mode:vertical-lr;direction:rtl;-webkit-appearance:slider-vertical;appearance:slider-vertical;width:56px;height:130px;accent-color:#c2410c;touch-action:none}
+.bk{width:90px;height:130px;border-radius:14px;background:linear-gradient(#dc2626,#7f1d1d);box-shadow:inset 0 0 0 3px #000;touch-action:none;user-select:none;-webkit-user-select:none}.bk:active{transform:scale(.96)}
+#hn{width:80px;height:80px;border-radius:50%;background:#facc15;color:#000;border:4px solid #000;touch-action:none}
+</style></head><body>
+<h1>🚂 Loco Pilot – Tamil Nadu</h1>
+<div id="menu" class="card"><div id="cr" class="en"></div><input id="nm" type="text" placeholder="Your name (career &amp; leaderboard)"><button id="lg" class="g">Login</button><div id="lb" class="en"></div><b>Shift</b><label><input type="radio" name="sh" value="360" checked> Morning → Night (starts 6:00 AM)</label><label><input type="radio" name="sh" value="1260"> Night → Morning (starts 9:00 PM)</label>
+<b>Climate</b><label><input type="radio" name="wx" value="auto" checked> Auto (changes on the way)</label><label><input type="radio" name="wx" value="clear"> Clear</label><label><input type="radio" name="wx" value="rain"> Rain</label><label><input type="radio" name="wx" value="fog"> Fog</label>
+<p class="en">Route: Chennai Egmore → Chengalpattu → Villupuram → Tiruchirappalli → Dindigul → Madurai (approx. distances)</p><button id="go">Start duty</button></div>
+<div id="pre" class="card hide"><b>Loco preparation</b><div class="row"><button class="g" id="fu">⛽ Fill diesel</button><button class="g" id="pw">🔌 Connect electric supply</button><button class="g" id="en" disabled>🔑 Start engine</button></div><div class="en" id="ps"></div><b>Pre-check (tap each)</b><div id="pl"></div>
+<p class="en"><b>Instructions:</b> Throttle notch 0-8 (W/S or slider). Hold BRAKE (Space). Horn (H). Keep under the speed limit (40 km/h within 2 km of a station). Stop with the train inside the platform zone. Obey red signals, blow horn for cattle, reset the compressor on a brake fault.</p><button id="dep" disabled>Call Control &amp; depart</button></div>
+<div id="game" class="hide"><canvas id="cv" width="360" height="240"></canvas>
+<div class="hud card"><div><b id="hs">0</b>km/h</div><div><b id="hl">110</b>limit</div><div><b id="hd">0</b>km to stn</div><div><b id="hc">06:00</b><span id="hw">☀️</span></div></div>
+<div class="en" id="st" style="text-align:center"></div><div class="card cab row"><div class="lv"><span>Throttle <b id="nt">0</b></span><input id="th" class="vt" type="range" min="0" max="8" value="0"></div><button id="br" class="bk">BRAKE<br>(hold)</button><button class="g" id="hn">📯 Horn</button><button class="g hide" id="fx">🔧 Reset compressor</button></div>
+<svg viewBox="0 0 200 230"><path id="tn" d="M185 30 L150 20 L120 50 L100 75 L70 90 L55 130 L70 165 L75 205 L90 220 L110 195 L140 150 L170 110 L180 70Z" fill="none" stroke="currentColor" opacity=".5" stroke-width="2"/><polyline id="rt" fill="none" stroke="#c2410c" stroke-width="2"/><g id="sd"></g><circle id="tr" r="5" fill="#c2410c"/></svg></div>
+<div id="sub" class="card"><div class="ta">—</div><div class="en"></div></div>
+<div id="dlg" class="card hide"></div>
+<div id="ai" class="card row hide"><input id="q" type="text" placeholder="Ask Control (AI): signal? weather? caution order?"><button id="ask">Ask</button></div>
+<div id="post" class="card hide"><b>Post-check</b><div id="ql"></div><div id="res"></div></div>
+<script>
+const $=s=>document.querySelector(s),R=[["Chennai Egmore","சென்னை எழும்பூர்",0,170,40],["Chengalpattu","செங்கல்பட்டு",56,162,56],["Villupuram","விழுப்புரம்",167,140,95],["Tiruchirappalli","திருச்சிராப்பள்ளி",336,105,140],["Dindigul","திண்டுக்கல்",420,80,175],["Madurai","மதுரை",497,85,205]];
+const EV=[{k:85,t:'cat'},{k:130,t:'red'},{k:250,t:'brk'},{k:380,t:'red'},{k:455,t:'cat'}];
+const PRE=["Sandbox full &amp; sander working","Fire extinguisher: pressure &amp; seal OK","Brake test (BP / FP pressure OK)","Headlight &amp; horn working","Vigilance device (alerter) test","Radio check with Control","Caution orders &amp; time table read"];
+const RK=["Trainee (Intern)","Assistant Loco Pilot","Shunter / Goods Loco Pilot","Loco Pilot (Passenger)","Senior Loco Pilot (Mail/Express)","Chief Loco Pilot","Loco Inspector (Senior Officer)"],CAP=[70,80,90,100,110,110,110];let C={age:21,r:0,gen:1};try{C=JSON.parse(localStorage.getItem('lp'))||C}catch(e){}
+function cs(){try{localStorage.setItem('lp',JSON.stringify(C))}catch(e){}}
+function cl(){$('#cr').innerHTML='Career: Gen '+C.gen+' · Age '+C.age+' · <b>'+RK[C.r]+'</b> (max '+CAP[C.r]+' km/h) · retire at 60'}
+function promo(){if(g.pd)return '';g.pd=1;C.age+=3;let m='';if(g.score>=80&&C.r<6){C.r++;m='🎉 Promoted to '+RK[C.r]+'!'}else if(g.score<40&&C.r>0){C.r--;m='Demoted to '+RK[C.r]+'.'}else m='Rank unchanged ('+RK[C.r]+').';m+=' Age now '+C.age+'.';if(C.age>=60){m+=' 🎖️ Retired after a full career! The next generation joins as a new Trainee at age 21.';C={age:21,r:0,gen:C.gen+1}}cs();if(NM)jp('/api/progress',{name:NM,age:C.age,r:C.r,gen:C.gen,score:g.score}).then(lb).catch(()=>{});return m}
+cl();
+const POST=["Reverser centred, throttle at 0","Brake applied &amp; parked","Lights off, cab locked","Log book &amp; defects reported"];
+let g={},cv=$('#cv'),x=cv.getContext('2d'),sample=null,last=0,hornT=0;
+const WX={clear:"☀️",rain:"🌧️",fog:"🌫️"};
+function speak(who,ta,en){$('#sub').innerHTML='<b>'+who+'</b><div class="ta">'+ta+'</div><div class="en">'+en+'</div>';try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(ta);u.lang='ta-IN';const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith('ta'));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+function checklist(el,items,done){el.innerHTML=items.map((t,i)=>'<label><input type="checkbox" data-i="'+i+'"> '+t+'</label>').join('');el.onchange=()=>done([...el.querySelectorAll('input')].every(c=>c.checked))}
+const P={fuel:0,pw:0,eng:0,temp:25,air:0};let pc=false;
+checklist($('#pl'),PRE,ok=>{pc=ok;rdy()});
+function en_(){$('#en').disabled=!(P.fuel>=80&&P.pw&&P.eng==0)}
+function rdy(){$('#dep').disabled=!(pc&&P.fuel>=100&&P.pw&&P.eng==2&&P.temp>=60&&P.air>=8);$('#ps').textContent='Diesel '+(P.fuel|0)+'% · Power '+(P.pw?'connected':'off')+' · Engine '+['off','starting…','running'][P.eng]+' · Temp '+(P.temp|0)+'°C (need 60) · Air '+P.air.toFixed(1)+' kg/cm² (need 8)'}
+$('#fu').onclick=()=>{if(P.fl)return;P.fl=setInterval(()=>{P.fuel=Math.min(100,P.fuel+5);if(P.fuel>=100){clearInterval(P.fl);speak('Fuelling','டீசல் நிரப்பப்பட்டது.','Diesel tank filled to full.')}en_();rdy()},200)};
+$('#pw').onclick=()=>{P.pw=1;speak('Electrician','மின் இணைப்பு இணைக்கப்பட்டது.','Electric supply (shore power) connected: battery, lights, cab fans ON.');en_();rdy()};
+$('#en').onclick=()=>{P.eng=1;en_();rdy();setTimeout(()=>{P.eng=2;speak('Loco Pilot','இன்ஜின் இயங்குகிறது. சூடேற்றம் தொடங்கியது; காற்றழுத்தம் நிரப்புகிறது.','Engine started. Warming up; compressor is filling air for brakes and horn.')},3000)};
+setInterval(()=>{if(g.ph=='pre'){if(P.eng==2){P.temp=Math.min(75,P.temp+1.2);P.air=Math.min(9,P.air+.2)}rdy()}},250);
+$('#sd').innerHTML=R.map(r=>'<circle cx="'+r[3]+'" cy="'+r[4]+'" r="3" fill="currentColor"/><text x="'+(r[3]+6)+'" y="'+(r[4]+4)+'" font-size="9" fill="currentColor">'+r[0].split(' ')[0]+'</text>').join('');
+$('#rt').setAttribute('points',R.map(r=>r[3]+','+r[4]).join(' '));
+$('#go').onclick=()=>{aud();const sh=+document.querySelector('[name=sh]:checked').value,wx=document.querySelector('[name=wx]:checked').value;
+g={km:0,v:0,thr:0,i:1,clock:sh,wmode:wx,w:wx=='auto'?'clear':wx,score:100,ph:'pre',br:0,bf:false,wk:0,ev:EV.map(e=>({...e})),warn:{},hold:false};
+$('#menu').classList.add('hide');$('#pre').classList.remove('hide');$('#game').classList.remove('hide');initAI();
+speak('Control','லோகோ பைலட், பணிக்கு வரவேற்கிறோம். முதலில் முன்-சோதனையை முடிக்கவும்.','Control: Welcome, Loco Pilot. Complete the pre-check first.')};
+$('#dep').onclick=()=>{$('#pre').classList.add('hide');speak('Control','கண்ட்ரோல், லோகோ பைலட் கவனிக்கவும். சிக்னல் பச்சை. புறப்பட அனுமதி.','Control: Signal is green. Permission to depart.');g.ph='drive'};
+$('#th').oninput=e=>{g.thr=+e.target.value;vib(15)};
+const bd=v=>()=>{g.br=v;if(v)vib(30)};$('#br').onpointerdown=bd(1);$('#br').onpointerup=bd(0);$('#br').onpointerleave=bd(0);
+$('#hn').onclick=()=>{if(P.air<5){speak('Loco Pilot','காற்று அழுத்தம் போதவில்லை!','Not enough air pressure for the horn!');return}P.air-=1;hornT=2;hornS();speak('Horn','பீப்! பீப்!','Horn blown')};
+$('#fx').onclick=()=>{$('#fx').disabled=true;speak('Loco Pilot','கம்ப்ரசர் ரீசெட் செய்கிறேன்.','Resetting compressor...');setTimeout(()=>{g.bf=false;$('#fx').classList.add('hide');$('#fx').disabled=false;speak('Control','பிரேக் அழுத்தம் சரியானது.','Brake pressure restored.')},6000)};
+onkeydown=e=>{if(!g.ph)return;if(e.key=='w'||e.key=='ArrowUp')setT(g.thr+1);if(e.key=='s'||e.key=='ArrowDown')setT(g.thr-1);if(e.key==' ')g.br=1;if(e.key=='h')$('#hn').click()};onkeyup=e=>{if(e.key==' ')g.br=0};
+function setT(n){g.thr=Math.max(0,Math.min(8,n));$('#th').value=g.thr}
+function pen(n,why){g.score=Math.max(0,g.score-n);if(n)$('#sub .en').insertAdjacentHTML('beforeend',' <b>(−'+n+': '+why+')</b>')}
+function lim(){const d=R[g.i][2]-g.km;return Math.min(CAP[C.r],d<2?40:g.w=='fog'?60:g.w=='rain'?90:110)}
+function step(dt){const ns=R[g.i],d=ns[2]-g.km,L=lim();
+ const acc=g.hold||P.fuel<=0?0:g.thr*2.5,brk=g.br?(g.bf?9:24):0;g.v=Math.max(0,Math.min(120,g.v+(acc-1-g.v*.01-brk)*dt));
+ if(g.hold)g.v=0;g.km+=g.v/60*dt;g.clock+=dt;if(hornT>0)hornT-=dt;P.fuel=Math.max(0,P.fuel-g.thr*dt*.03);P.air=Math.min(9,P.air+.3*dt);if(P.fuel<=0&&!g.nf){g.nf=1;speak('Loco Pilot','டீசல் தீர்ந்தது! அடுத்த நிலையத்தில் நிரப்பவும்.','Out of diesel! Coast to the next station and refuel.')}
+ if(g.v>L+5){g.ov=(g.ov||0)+dt;if(g.ov>3){g.ov=0;pen(3,'overspeed')}}
+ const w=Math.floor(g.km/100);if(w!=g.wk){g.wk=w;if(g.wmode=='auto'){g.w=['clear','rain','fog'][Math.random()*3|0];const m={clear:['வானிலை தெளிவு.','Weather has cleared.'],rain:['மழை பெய்கிறது. கவனமாக ஓட்டவும்.','Rain started. Drive carefully (limit 90).'],fog:['மூடுபனி. வேகம் 60 க்குள் வைக்கவும்.','Dense fog. Keep speed under 60.']}[g.w];speak('Control',m[0],m[1])}}
+ if(d<4&&!g.warn['a'+g.i]){g.warn['a'+g.i]=1;speak('Loco Pilot',ns[1]+' நிலையம் நெருங்குகிறது. வேகத்தைக் குறைக்கவும்.',ns[0]+' station approaching. Reduce speed.')}
+ g.ev.forEach((e,j)=>{if(e.done)return;const ed=e.k-g.km;
+  if(e.t=='cat'){if(ed<2&&!e.w){e.w=1;speak('Control','தண்டவாளத்தில் மாடுகள்! ஹாரன் அடிக்கவும், வேகத்தைக் குறைக்கவும்.','Cattle on the track ahead! Blow the horn and slow down.')}if(ed<2&&hornT>0)e.cl=1;if(ed<=0){e.done=1;if(!e.cl&&g.v>30)pen(40,'cattle hit');else g.score+=5}}
+  if(e.t=='red'){if(ed<3&&!e.w){e.w=1;speak('Control','சிவப்பு சிக்னல்! உடனே நிறுத்தவும்.','Red signal ahead! Stop before the signal.')}if(ed<.8&&ed>0&&g.v<1&&!e.ok){e.s=(e.s||0)+dt;if(e.s>4){e.ok=1;speak('Control','சிக்னல் பச்சை. தொடரவும்.','Signal now green. Proceed.')}}if(ed<=0&&!e.done){e.done=1;if(!e.ok)pen(60,'signal passed at danger')}}
+  if(e.t=='brk'&&ed<=0){e.done=1;g.bf=true;$('#fx').classList.remove('hide');speak('Loco Pilot','பிரேக் அழுத்தம் குறைவு! கம்ப்ரசர் ரீசெட் செய்யவும்.','Low brake pressure! Reset the compressor and slow down.')}});
+ if(d<-.3){g.v=0;g.km=ns[2];pen(20,'overshot platform');arrive()}else if(g.v<1&&Math.abs(d)<=.3&&g.thr==0)arrive();
+ $('#hs').textContent=g.v|0;$('#hl').textContent=L;$('#hd').textContent=Math.max(0,d).toFixed(1);$('#nt').textContent=g.thr;
+ const h=g.clock/60%24;$('#hc').textContent=String(h|0).padStart(2,'0')+':'+String(g.clock%60|0).padStart(2,'0');$('#hw').textContent=WX[g.w];$('#st').textContent='⛽ '+(P.fuel|0)+'% · 💨 Air '+P.air.toFixed(1)+' · 🌡️ '+(P.temp|0)+'°C'}
+function arrive(){const ns=R[g.i],last=g.i==R.length-1;g.ph='stop';g.v=0;
+ speak('Station announcement','பயணிகளின் கவனத்திற்கு, இந்த ரயில் '+ns[1]+' நிலையத்தை வந்தடைந்துள்ளது.','Attention passengers: this train has arrived at '+ns[0]+' station.');
+ if(last){setTimeout(endRun,4000);return}
+ const d=$('#dlg');d.classList.remove('hide');
+ setTimeout(()=>{speak('Station Master','ஸ்டேஷன் மாஸ்டர்: வண்டி சரியாக நின்றது. வண்டி நிலையை உறுதிப்படுத்தவும்.','Station Master: Train stopped correctly. Confirm the train status.');
+ d.innerHTML='<b>Reply to Station Master</b><br><button data-ok="1">வண்டி சரி, புறப்பட தயார்<br><small>Train in order, ready to depart</small></button><button data-ok="1" data-f="1">வண்டி சரி + டீசல் நிரப்பு<br><small>Train in order + refuel diesel</small></button><button class="g" data-ok="0">தெரியவில்லை<br><small>I don\'t know</small></button>';
+ d.onclick=e=>{const b=e.target.closest('button');if(!b)return;d.classList.add('hide');if(b.dataset.f)P.fuel=100;if(b.dataset.ok!='1')pen(10,'poor radio reply');else g.score+=5;
+  setTimeout(()=>{speak('Station Master','கார்டு ரைட் அவே கொடுத்தார். சிக்னல் பச்சை. புறப்படலாம்.','Guard gave right-away. Signal green. You may depart.');g.i++;g.ph='drive';g.hold=false;setT(0)},3000)}},3500)}
+function endRun(){g.ph='end';$('#post').classList.remove('hide');checklist($('#ql'),POST,ok=>{if(ok){speak('Control','பயணம் நிறைவடைந்தது. சிறப்பான பணி.','Journey complete. Well done.');const m=promo();$('#res').innerHTML='<h3>Final score: '+g.score+'/100</h3><p>'+m+'</p><button id="db" class="g hide">AI debrief</button> <button id="rs">Play again</button><div id="dbt" class="en"></div>';$('#rs').onclick=()=>location.reload();if(true){$('#db').classList.remove('hide');$('#db').onclick=async()=>{try{const r=await askAI('You are a veteran Southern Railway loco inspector. Give a 4-line debrief for a trainee pilot who scored '+g.score+' (100 = perfect, penalties for overspeed, passing signals at danger, cattle, overshooting platforms). Tamil first, then English translation.');$('#dbt').textContent=r.text}catch(e){}}}}})}
+async function initAI(){try{sample=await claude.use('sample')}catch(e){}$('#ai').classList.remove('hide')}
+$('#ask').onclick=async()=>{const q=$('#q').value.trim();if(!q)return;$('#q').value='';speak('Control (AI)','…','Thinking…');
+ try{const s={station_next:R[g.i][0],km_to_stn:+(R[g.i][2]-g.km).toFixed(1),speed:g.v|0,limit:lim(),weather:g.w,time:$('#hc').textContent,brake_fault:g.bf};
+ const r=await askAI('You are the Southern Railway control room operator talking by radio to a loco pilot in a realistic Tamil Nadu train simulator. Use real railway terms (signal, line clear, caution order, notch, PAD). Game state: '+JSON.stringify(s)+'. Pilot says: "'+q+'". Reply in max 2 short sentences. Format exactly: TAMIL text, then a new line "EN: " followed by English translation.');
+ const p=r.text.split(/EN:/i);speak('Control (AI)',p[0].trim(),(p[1]||'').trim())}catch(e){speak('Control','சிக்னல் பலவீனம். மீண்டும் முயற்சிக்கவும்.','Radio weak. Try again.')}};
+function draw(){if(!g.ph||g.ph=='pre')return;draw3();return;const W=360,H=180,h=g.clock/60%24,b=h>=7&&h<=17?1:h>5.5&&h<7?(h-5.5)/1.5:h>17&&h<19?(19-h)/2:0,m=(a,c)=>Math.round(c+(a-c)*b);
+ x.fillStyle='rgb('+m(135,10)+','+m(190,15)+','+m(230,40)+')';x.fillRect(0,0,W,H);x.fillStyle='rgb('+m(70,15)+','+m(130,28)+','+m(60,20)+')';x.fillRect(0,120,W,60);
+ x.fillStyle='rgb('+m(90,25)+','+m(90,25)+','+m(90,25)+')';x.fillRect(0,128,W,6);x.fillRect(0,138,W,3);
+ for(let k=Math.floor(g.km*4)/4-.5;k<g.km+1.5;k+=.25){const px=40+(k-g.km)*360;x.fillStyle='#555';x.fillRect(px,95,3,33)}
+ const sx=(k)=>40+(k-g.km)*360,ns=R[g.i];if(Math.abs(ns[2]-g.km)<1.2){x.fillStyle='#a8a29e';x.fillRect(sx(ns[2])-70,112,140,16);x.fillStyle='#fde68a';x.fillRect(sx(ns[2])-70,70,140,8);x.fillStyle='#000';x.font='10px sans-serif';x.fillText(ns[0],sx(ns[2])-60,86)}
+ g.ev.forEach(e=>{if(e.done&&e.t!='red')return;const px=sx(e.k);if(px<-20||px>400)return;if(e.t=='cat'&&!e.cl){x.fillStyle='#78350f';x.fillRect(px,118,22,12)}if(e.t=='red'){x.fillStyle='#333';x.fillRect(px,80,4,48);x.fillStyle=e.ok?'#22c55e':'#ef4444';x.beginPath();x.arc(px+2,84,5,0,7);x.fill()}});
+ x.fillStyle='#1d4ed8';x.fillRect(0,100,70,32);x.fillStyle='#93c5fd';x.fillRect(48,104,18,10);
+ if(b<.6){x.fillStyle='rgba(255,240,150,.35)';x.beginPath();x.moveTo(70,112);x.lineTo(200,95);x.lineTo(200,135);x.fill()}
+ if(g.w=='rain'){x.strokeStyle='rgba(180,200,255,.6)';for(let i=0;i<50;i++){const a=(i*53+g.clock*40)%W,c=(i*29+g.clock*90)%H;x.beginPath();x.moveTo(a,c);x.lineTo(a-3,c+8);x.stroke()}}
+ if(g.w=='fog'){x.fillStyle='rgba(200,200,200,.55)';x.fillRect(0,0,W,H)}
+ const f=Math.min(1,Math.max(0,(g.km-R[g.i-1>=0?g.i-1:0][2])/Math.max(1,R[g.i][2]-R[g.i-1>=0?g.i-1:0][2])));const a=R[g.i-1>=0?g.i-1:0],c=R[g.i];$('#tr').setAttribute('cx',a[3]+(c[3]-a[3])*f);$('#tr').setAttribute('cy',a[4]+(c[4]-a[4])*f)}
+let ac=null,eo,eg,vt=0;
+function vib(n){try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}}
+function aud(){try{ac=new(window.AudioContext||window.webkitAudioContext)();eo=ac.createOscillator();eg=ac.createGain();const f=ac.createBiquadFilter();f.frequency.value=220;eo.type='sawtooth';eo.connect(f);f.connect(eg);eg.connect(ac.destination);eg.gain.value=0;eo.start()}catch(e){ac=null}}
+function snd(){if(!ac||(g.ph!='drive'&&g.ph!='stop'))return;eg.gain.value=P.eng==2?.05+g.thr*.006:0;eo.frequency.value=28+g.thr*6+g.v*.2;vt++;if(vt%45==0&&g.v>10)vib(18)}
+function hornS(){vib(60);if(!ac)return;[392,494].forEach(f=>{const o=ac.createOscillator(),n=ac.createGain();o.type='square';o.frequency.value=f;n.gain.value=.06;o.connect(n);n.connect(ac.destination);o.start();o.stop(ac.currentTime+.9)})}
+function gauge(cx,cy,r,f,l,t){x.fillStyle='#0b0b0b';x.beginPath();x.arc(cx,cy,r,0,7);x.fill();x.strokeStyle='#888';x.lineWidth=2;x.beginPath();x.arc(cx,cy,r-2,Math.PI*.8,Math.PI*2.2);x.stroke();const a=Math.PI*.8+Math.PI*1.4*Math.min(1,Math.max(0,f));x.strokeStyle='#f97316';x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(a)*(r-5),cy+Math.sin(a)*(r-5));x.stroke();x.fillStyle='#ddd';x.font='9px sans-serif';x.textAlign='center';x.fillText(l+' '+t,cx,cy+r-6)}
+function draw3(){const W=360,H=240,hz=108,F=400,CH=2.4,h=g.clock/60%24,b=h>=7&&h<=17?1:h>5.5&&h<7?(h-5.5)/1.5:h>17&&h<19?(19-h)/2:0,m=(a,c)=>Math.round(c+(a-c)*b),sh=g.v/50,px=(o,z)=>180+F*o/z,py=(y,z)=>hz+F*(CH-y)/z;
+x.save();x.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
+const sk=x.createLinearGradient(0,0,0,hz);sk.addColorStop(0,'rgb('+m(70,5)+','+m(130,10)+','+m(210,30)+')');sk.addColorStop(1,'rgb('+m(190,30)+','+m(220,35)+','+m(240,60)+')');x.fillStyle=sk;x.fillRect(-5,0,W+10,hz);
+x.fillStyle='rgb('+m(80,12)+','+m(110,20)+','+m(90,22)+')';x.beginPath();x.moveTo(-5,hz);for(let i=0;i<=8;i++)x.lineTo(i*46,hz-12-((i*37)%5)*5);x.lineTo(W+5,hz);x.fill();
+x.fillStyle='rgb('+m(70,15)+','+m(120,28)+','+m(55,18)+')';x.fillRect(-5,hz,W+10,H);
+x.fillStyle='rgb('+m(120,30)+','+m(110,28)+','+m(100,26)+')';x.beginPath();x.moveTo(180,hz);x.lineTo(px(-3,3),py(0,3));x.lineTo(px(3,3),py(0,3));x.fill();
+const off=(g.km*1000)%1.6;x.fillStyle='rgb('+m(70,18)+','+m(50,14)+','+m(40,10)+')';for(let z=3.5-off;z<110;z+=1.6){if(z<3)continue;x.fillRect(180-F*.85/z,py(0,z),F*1.7/z,Math.max(1,F*.15/z))}
+x.strokeStyle='#aaa';x.lineWidth=2;[-.75,.75].forEach(o=>{x.beginPath();x.moveTo(180,hz);x.lineTo(px(o,3),py(0,3));x.stroke()});
+const mo=(g.km*1000)%50;x.strokeStyle='rgb('+m(90,30)+','+m(90,30)+','+m(90,30)+')';for(let z=50-mo;z<600;z+=50){if(z<4)continue;[-4,4].forEach(o=>{x.lineWidth=Math.max(1,F*.3/z);x.beginPath();x.moveTo(px(o,z),py(0,z));x.lineTo(px(o,z),py(6,z));x.stroke()})}
+const ns=R[g.i],sd=(ns[2]-g.km)*1000;
+if(sd>-80&&sd<700){const z1=Math.max(3,sd-80),z2=sd+80;if(z2>3){x.fillStyle='rgb('+m(170,50)+','+m(165,48)+','+m(150,44)+')';x.beginPath();[[2.2,z1],[9,z1],[9,z2],[2.2,z2]].forEach((p,i)=>{const X=px(p[0],p[1]),Y=py(1,p[1]);i?x.lineTo(X,Y):x.moveTo(X,Y)});x.fill();if(sd>6){const s=F/sd;x.fillStyle='#1e40af';x.fillRect(px(2.4,sd),py(4.2,sd),s*3.4,s*.9);x.fillStyle='#fff';x.font=Math.max(6,Math.min(15,s*.5))+'px sans-serif';x.textAlign='left';x.fillText(ns[0],px(2.5,sd),py(3.55,sd))}}}
+g.ev.forEach(e=>{const z=(e.k-g.km)*1000;if(z<4||z>900)return;const s=F/z;if(e.t=='cat'&&!e.cl){x.fillStyle='#78350f';x.fillRect(px(-1.2,z),py(1.3,z),s*1.3,s*1.3);x.fillRect(px(.1,z),py(1.3,z),s*1.3,s*1.3)}if(e.t=='red'){x.fillStyle='#333';x.fillRect(px(2.2,z),py(5,z),Math.max(1,s*.15),s*5);x.fillStyle=e.ok?'#22c55e':'#ef4444';x.beginPath();x.arc(px(2.2,z),py(4.6,z),Math.max(2,s*.3),0,7);x.fill()}});
+if(b<.6){const gr=x.createRadialGradient(180,170,5,180,150,150);gr.addColorStop(0,'rgba(255,240,170,.35)');gr.addColorStop(1,'rgba(255,240,170,0)');x.fillStyle=gr;x.fillRect(0,hz,W,H)}
+if(g.w=='rain'){x.strokeStyle='rgba(190,210,255,.55)';x.lineWidth=1;for(let i=0;i<60;i++){const a=(i*53+g.clock*40)%W,c=(i*29+g.clock*110)%165;x.beginPath();x.moveTo(a,c);x.lineTo(a-3,c+9);x.stroke()}}
+if(g.w=='fog'){const fg=x.createLinearGradient(0,hz-60,0,H);fg.addColorStop(0,'rgba(210,210,215,.7)');fg.addColorStop(1,'rgba(210,210,215,.35)');x.fillStyle=fg;x.fillRect(0,0,W,H)}
+x.restore();
+x.fillStyle='#1b1815';x.beginPath();x.moveTo(0,0);x.lineTo(34,0);x.lineTo(14,165);x.lineTo(0,165);x.fill();x.beginPath();x.moveTo(W,0);x.lineTo(W-34,0);x.lineTo(W-14,165);x.lineTo(W,165);x.fill();x.fillRect(0,0,W,6);
+x.fillStyle='#2a2622';x.fillRect(0,165,W,H-165);x.fillStyle='#4a433a';x.fillRect(0,165,W,4);
+gauge(80,205,30,g.v/120,'km/h',g.v|0);gauge(180,208,24,P.air/10,'AIR',P.air.toFixed(1));gauge(275,208,24,P.fuel/100,'FUEL',P.fuel|0);
+x.textAlign='left';x.font='bold 11px sans-serif';x.fillStyle='#fde68a';x.fillText('LIMIT '+lim(),44,22);if(g.bf){x.fillStyle='#ef4444';x.fillText('⚠ BRAKE FAULT',44,38)}if(g.v>lim()+5){x.fillStyle='#ef4444';x.fillText('⚠ OVERSPEED',44,54)}
+const ia=Math.max(0,g.i-1),a=R[ia],c=R[g.i],f=Math.min(1,Math.max(0,(g.km-a[2])/Math.max(1,c[2]-a[2])));$('#tr').setAttribute('cx',a[3]+(c[3]-a[3])*f);$('#tr').setAttribute('cy',a[4]+(c[4]-a[4])*f)}
+const API=window.API_BASE||'';let NM=localStorage.getItem('nm')||'';
+async function jp(u,b){const r=await fetch(API+u,b?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}:{});if(!r.ok)throw 0;return r.json()}
+async function lb(){try{const l=await jp('/api/leaderboard');$('#lb').innerHTML='<b>🏆 Leaderboard</b><br>'+l.map((p,i)=>(i+1)+'. '+p.name+' – best '+p.best+' · '+RK[p.r]+' · Gen '+p.gen).join('<br>')}catch(e){}}
+async function login(){NM=($('#nm').value||NM).trim();if(!NM)return;try{const p=await jp('/api/login',{name:NM});C={age:p.age,r:p.r,gen:p.gen};localStorage.setItem('nm',NM);cs();cl();lb()}catch(e){$('#lb').textContent='Server offline - playing locally'}}
+async function askAI(p){if(sample)return await sample(p);const j=await jp('/api/control',{prompt:p});if(!j.text)throw 0;return{text:j.text}}
+$('#lg').onclick=login;$('#nm').value=NM;if(NM)login();lb();
+function tick(t){const dt=Math.min((t-last)/1000,.1);last=t;if(g.ph=='drive')step(dt);draw();snd();requestAnimationFrame(tick)}requestAnimationFrame(tick);
+</script></body></html>
